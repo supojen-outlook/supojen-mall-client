@@ -1,0 +1,67 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #fff8f6;  /* 改為與頁面相同的背景色 */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Element Plus 主題色變數 */
+  --el-color-primary: #B33B15; 
+  --el-color-primary-light-3: #C65A3A;
+  --el-color-primary-light-5: #D9795F;
+  --el-color-primary-light-7: #EC9884;
+  --el-color-primary-light-8: #F2B39F;
+  --el-color-primary-light-9: #F8CEBA;
+  --el-color-primary-dark-2: #8F2F12; /* 主色 - 可以改成你想要的顏色 */
+
+  /* 其他顏色變數 */
+  --el-color-success: #67c23a;
+  --el-color-warning: #e6a23c;
+  --el-color-danger: #f56c6c;
+  --el-color-info: #909399;
+
+  --el-bg-color: #fff1ed;
+  --el-bg-color-page: #fff8f6;
+  --el-surface-container: #f7e4e0;
+  
+
+  --el-tertiary-container-color: #534619;
+  --el-tertiary-on-container-color: #ffdbd1;;
+}
+
+/* 覆蓋 el-divider 顏色 */
+.el-divider {
+  background-color: var(--el-surface-container);
+  border-color: var(--el-surface-container);
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 確保整個頁面背景色正確 */
+html {
+    background-color: #fff8f6;
+}
+
+body {
+    background-color: #fff8f6;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+#app {
+    background-color: #fff8f6;
+    min-height: 100vh;
+}
