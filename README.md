@@ -145,48 +145,87 @@ npm install
 npm run dev
 ```
 
-### 2. 生產環境建置
+### 2. 生產環境部署（Docker + GitHub Actions）
+
+#### 步驟 1：推送 Git Tag 觸發建置
 
 ```bash
-# 建置靜態文件（輸出到 dist/ 目錄）
-npm run build
+# 1. 確保所有變更已提交
+git add .
+git commit -m "準備部署 v1.0.0"
 
-# 建置後的靜態文件可直接部署到任何靜態網站托管服務
+# 2. 建立並推送 tag，觸發 GitHub Actions
+VERSION="v1.0.0"
+git tag $VERSION
+git push origin $VERSION
 ```
 
-### 3. Docker 部署（搭配 Nginx Proxy）
+GitHub Actions 會自動建置 Docker 映像並推送到 GitHub Container Registry (ghcr.io)。
 
-此專案假設與 `nginx-proxy` 專案配合使用，提供 SSL 與反向代理：
+#### 步驟 2：伺服器部署
 
 ```bash
-# 1. 建置生產版本
-npm run build
+# 1. 登入 GitHub Container Registry
+docker login ghcr.io -u <你的 GitHub 用戶名> -p <GITHUB_TOKEN>
 
-# 2. 將 dist/ 目錄部署到伺服器
-scp -r dist/ user@your-server:/var/www/client/
+# 2. 拉取最新映像
+docker pull ghcr.io/<你的 GitHub 用戶名>/mall-client:v1.0.0
 
-# 3. 在 nginx-proxy 配置反向代理
-# 編輯 nginx/conf.d/your-domain.conf
+# 3. 運行容器
+docker run -d \
+  --name mall-client \
+  -p 3000:80 \
+  ghcr.io/<你的 GitHub 用戶名>/mall-client:v1.0.0
 ```
 
-### 4. 使用 Makefile（推薦）
+### 3. 本地 Docker 建置
 
 ```bash
-# 查看可用指令
-make help
+# 建置映像
+docker build -t mall-client .
 
-# 完整部署流程
-make deploy DOMAIN=your-domain.com
+# 本地運行測試
+docker run -d --name mall-client -p 3000:80 mall-client
 ```
 
 ## 環境變數
 
-建立 `.env` 文件設定以下變數：
+專案使用 Vite 的環境變數系統來區分開發與生產環境的 API 設定。
 
+### 設定檔案說明
+
+| 檔案 | 用途 | 是否加入 Git |
+|------|------|--------------|
+| `.env` | 本地開發環境設定 | ❌ 否 |
+| `.env.production` | 生產環境建置設定 | ❌ 否 |
+
+### 建立環境變數檔案
+
+**本地開發 (`.env`)：**
 ```env
-VITE_API_BASE_URL=https://api.your-domain.com/api
-VITE_WS_URL=wss://api.your-domain.com/ws
+VITE_API_BASE_URL=https://localhost:7175
 ```
+
+**生產環境 (`.env.production`)：**
+```env
+VITE_API_BASE_URL=https://api.your-domain.com
+```
+
+### 使用方式
+
+```typescript
+// src/services/Request.ts
+const API_CONFIG = {
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7175'
+}
+```
+
+### 運作原理
+
+- `npm run dev` → 使用 `.env` 的設定
+- `npm run build` → 使用 `.env.production` 的設定（並將值編譯進打包後的 JS）
+
+**注意**：`.env` 和 `.env.production` 不需要上傳到伺服器，環境變數在**建置時**就已嵌入最終檔案。只需要部署 `dist` 目錄或 Docker 映像即可。
 
 ## 路由認證
 

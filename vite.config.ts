@@ -5,6 +5,9 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  build: {
+    chunkSizeWarningLimit: 1000,  // 改成 1000KB 才警告
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

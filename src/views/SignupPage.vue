@@ -2,7 +2,7 @@
   <div class="signup-page">
     <div class="signup-panel">
       <div class="logo-container">
-        <img src="/logo.png" alt="Logo" class="company-logo" />
+        <img src="/logo_2.png" alt="Logo" class="company-logo" />
       </div>
       <h2>歡迎加入小紅帽</h2>
       <p class="subtitle">協助小商戶，實現自由市場，讓生活更美好</p>
@@ -203,5 +203,70 @@ h2 {
   font-size: 13px;
   color: #666;
   margin-top: 12px;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .signup-page {
+    padding: 16px;
+  }
+
+  .signup-panel {
+    padding: 24px 16px;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .email-input-wrapper {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .email-input-wrapper .el-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .get-code-btn {
+    width: auto;
+    min-width: 100px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .company-logo {
+    max-width: 60px;
+  }
+
+  .login-link {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .signup-page {
+    padding: 12px;
+  }
+
+  .signup-panel {
+    padding: 20px 12px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
 }
 </style>

@@ -1,10 +1,14 @@
 <template>
   <div class="login-page">
     <div class="left-panel">
-      <img src="/logo.png" alt="Logo" class="logo-image" />
+      <img src="/logo_2.png" alt="Logo" class="logo-image" />
     </div>
     <div class="right-panel">
       <div class="login-form">
+        <!-- 手機版 Logo -->
+        <div class="mobile-logo">
+          <img src="/logo_2.png" alt="Logo" class="mobile-logo-image" />
+        </div>
         <h1 class="welcome-title">歡迎回來</h1>
         <p class="subtitle">請輸入您的詳細資訊以登入帳戶。</p>
         
@@ -222,5 +226,73 @@ const goToResetPassword = () => {
   font-size: 13px;
   color: #666;
   margin-top: 10px;
+}
+
+/* ===== Mobile Logo (hidden on desktop) ===== */
+.mobile-logo {
+  display: none;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mobile-logo-image {
+  max-width: 120px;
+  height: auto;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    display: none;
+  }
+
+  .mobile-logo {
+    display: block;
+  }
+
+  .right-panel {
+    flex: 1;
+    padding: 20px;
+    width: 100%;
+  }
+
+  .login-form {
+    max-width: 100%;
+  }
+
+  .welcome-title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .line-login-btn {
+    font-size: 14px;
+  }
+
+  .register-link {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 375px) {
+  .right-panel {
+    padding: 16px;
+  }
+
+  .welcome-title {
+    font-size: 20px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
 }
 </style>
