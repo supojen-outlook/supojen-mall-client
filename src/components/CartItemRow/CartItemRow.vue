@@ -4,7 +4,7 @@
     <div class="left-section">
       <div class="product-image" @click="goToProduct">
         <img 
-          :src="item.productImage || 'https://via.placeholder.com/80?text=商品圖片'" 
+          :src="item.productImage || '/placeholder-product.png'" 
           :alt="item.productName"
           @error="handleImageError"
           class="product-img"
@@ -110,7 +110,7 @@ const quantity = ref(props.item.quantity)
 // Handle image error
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/80?text=商品圖片'
+  img.src = '/placeholder-product.png'
 }
 
 // Go to product page
