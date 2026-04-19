@@ -85,7 +85,7 @@ const totalQuantity = computed(() => {
 // Handle image error
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
-  img.src = '/placeholder-product.png' // Fallback image
+  img.src = '/shop/placeholder-product.png' // Fallback image
 }
 </script>
 

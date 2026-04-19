@@ -1,7 +1,7 @@
 <template>
   <div class="product-page">
-    <div class="loading" v-if="loading">
-      <el-loading :loading="loading" />
+    <div class="loading" v-if="loading" v-loading="loading">
+      <span>載入中...</span>
     </div>
     
     <div class="error" v-else-if="error">
@@ -118,7 +118,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElLoading, ElButton, ElResult, ElTag, ElInputNumber } from 'element-plus'
+import { ElButton, ElResult, ElTag, ElInputNumber } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { getProduct } from '@/services/Product'
 import { getSkus } from '@/services/Sku'

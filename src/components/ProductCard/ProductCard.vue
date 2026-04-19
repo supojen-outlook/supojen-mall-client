@@ -26,9 +26,6 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// 調試：檢查商品數據
-console.log('ProductCard 收到的商品數據:', props.product)
-
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   img.src = 'https://via.placeholder.com/300?text=商品圖片'

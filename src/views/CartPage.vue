@@ -1,7 +1,7 @@
 <template>
   <div class="cart-page">
-    <div class="loading" v-if="loading">
-      <el-loading :loading="loading" />
+    <div class="loading" v-if="loading" v-loading="loading">
+      <span>載入中...</span>
     </div>
     
     <div class="error" v-else-if="error">
@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElLoading, ElResult, ElButton } from 'element-plus'
+import { ElResult, ElButton } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { getCartItems } from '@/services/CartItem'
 import { getAvailableDiscounts } from '@/services/Discount'

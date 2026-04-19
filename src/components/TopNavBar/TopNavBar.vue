@@ -13,15 +13,15 @@
       
       <!-- 桌面版導航 -->
       <ul class="nav-menu desktop-nav">
-        <li><a href="/about">關於我們</a></li>
-        <li><a href="/shopping-cart">購物車</a></li>
-        <li><a href="/my-orders">我的訂單</a></li>
+        <li><a href="/shop/about">關於我們</a></li>
+        <li><a href="/shop/shopping-cart">購物車</a></li>
+        <li><a href="/shop/my-orders">我的訂單</a></li>
       </ul>
       
       <!-- 用戶操作區 -->
       <div class="user-actions">
         <!-- 未登入顯示登入按鈕 -->
-        <a v-if="!isLogin" href="/login" class="login-link">註冊｜登入</a>
+        <a v-if="!isLogin" href="/shop/login" class="login-link">註冊｜登入</a>
         
         <!-- 登入後顯示用戶下拉選單 -->
         <el-dropdown v-else trigger="hover" @command="handleCommand">

@@ -5,6 +5,7 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  base: '/shop/',
   build: {
     chunkSizeWarningLimit: 1000,  // 改成 1000KB 才警告
   },

@@ -1,9 +1,9 @@
 <template>
   <div class="confirm-order-page">
-    <div class="loading" v-if="loading">
-      <el-loading :loading="loading" />
+    <div class="loading" v-if="loading" v-loading="loading">
+      <span>載入中...</span>
     </div>
-    
+
     <div class="error" v-else-if="error">
       <el-result
         icon="error"
@@ -85,7 +85,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElLoading, ElResult, ElButton, ElMessage } from 'element-plus'
+import { ElResult, ElButton, ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { getCartItems } from '@/services/CartItem'
 import { getAvailableDiscounts, getAvaliableCoupons } from '@/services/Discount'

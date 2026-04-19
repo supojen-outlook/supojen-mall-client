@@ -24,8 +24,7 @@ export const initAntiforgery = async () => {
     
     // 設置過期時間（建議設為 15 分鐘，通常比後端 Session 稍短以保安全）
     tokenExpireTime = Date.now() + 15 * 60 * 1000;
-    
-    console.log('✅ 防偽令牌已更新，有效期至:', new Date(tokenExpireTime).toLocaleTimeString());
+
     return currentRequestToken;
   } catch (error) {
     console.error('❌ 獲取防偽令牌失敗:', error);

@@ -179,7 +179,7 @@
                 class="item-row"
               >
                 <el-image
-                  :src="item.productImageUrl || '/placeholder-product.png'"
+                  :src="item.productImageUrl || '/shop/placeholder-product.png'"
                   :alt="item.productName"
                   class="item-image"
                   fit="cover"

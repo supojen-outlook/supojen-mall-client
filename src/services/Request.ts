@@ -103,7 +103,7 @@ worker.interceptors.response.use(
     if (error.response?.status === 401) {
       // 清除用戶狀態並重導向到登入頁面
       useAccountStore().logout();
-      window.location.href = '/login';
+      window.location.href = '/shop/login';
     }
     
     // 2. ⭐ 統一處理防偽驗證失敗 (通常為 400 且含有 Antiforgery 關鍵字)

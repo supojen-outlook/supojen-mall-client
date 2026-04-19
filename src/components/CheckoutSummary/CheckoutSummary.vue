@@ -110,8 +110,6 @@ const finalTotal = computed(() => {
 
 // Proceed to checkout
 const proceedToCheckout = () => {
-  // Navigate to confirm order page
-  console.log('Proceeding to checkout with items:', props.cartItems)
   router.push('/confirm-order')
 }
 </script>
