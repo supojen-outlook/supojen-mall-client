@@ -231,11 +231,28 @@ const validateField = async (field: string) => {
   .recipient-form :deep(.el-card__body) {
     padding: 16px;
   }
-  
+
   .recipient-form-content {
     gap: 16px;
   }
-  
+
+  .recipient-form :deep(.el-form-item) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .recipient-form :deep(.el-form-item__label) {
+    width: auto !important;
+    padding-right: 0;
+    line-height: 1.4;
+  }
+
+  .recipient-form :deep(.el-form-item__content) {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+
   .privacy-notice {
     padding: 10px;
   }
