@@ -39,6 +39,20 @@
         </el-input>
       </el-form-item>
       
+      <!-- Email -->
+      <el-form-item label="電子郵件" prop="email">
+        <el-input
+          v-model="formData.email"
+          placeholder="請輸入電子郵件"
+          clearable
+          @blur="validateField('email')"
+        >
+          <template #prefix>
+            <el-icon><Message /></el-icon>
+          </template>
+        </el-input>
+      </el-form-item>
+      
       <!-- Shipping Address -->
       <el-form-item :label="addressLabel" prop="address">
         <el-input
@@ -76,7 +90,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { useAccountStore } from '@/stores'
 import { 
   ElCard, 
   ElForm, 
@@ -85,7 +100,7 @@ import {
   ElIcon, 
   ElText 
 } from 'element-plus'
-import { Phone, Lock } from '@element-plus/icons-vue'
+import { Phone, Lock, Message } from '@element-plus/icons-vue'
 import type { FormInstance, FormRules } from 'element-plus'
 
 interface Props {
@@ -93,6 +108,7 @@ interface Props {
     name: string
     phone: string
     address: string
+    email?: string
     remarks?: string
   }
   selectedShippingMethod?: string
@@ -112,8 +128,11 @@ const formData = reactive({
   name: props.recipientInfo.name,
   phone: props.recipientInfo.phone,
   address: props.recipientInfo.address,
+  email: props.recipientInfo.email || '',
   remarks: props.recipientInfo.remarks || ''
 })
+
+const accountStore = useAccountStore()
 
 // Form validation rules
 const formRules: FormRules = {
@@ -129,6 +148,10 @@ const formRules: FormRules = {
   address: [
     { required: true, message: '請輸入收件地址', trigger: 'blur' },
     { min: 10, max: 200, message: '地址長度應在 10-200 個字元之間', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: '請輸入電子郵件', trigger: 'blur' },
+    { type: 'email', message: '請輸入正確的電子郵件格式', trigger: 'blur' }
   ],
   remarks: [
     { max: 500, message: '備註長度不能超過 500 個字元', trigger: 'blur' }
@@ -158,8 +181,16 @@ watch(() => props.recipientInfo, (newInfo) => {
   formData.name = newInfo.name
   formData.phone = newInfo.phone
   formData.address = newInfo.address
+  formData.email = newInfo.email || accountStore.profile?.email || ''
   formData.remarks = newInfo.remarks || ''
 }, { deep: true, immediate: true })
+
+// Init email from AccountStore
+onMounted(() => {
+  if (!formData.email && accountStore.profile?.email) {
+    formData.email = accountStore.profile.email
+  }
+})
 
 // Watch for form data changes and emit to parent
 watch(formData, (newFormData) => {

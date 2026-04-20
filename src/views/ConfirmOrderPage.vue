@@ -90,6 +90,8 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 import { getCartItems } from '@/services/CartItem'
 import { getAvailableDiscounts, getAvaliableCoupons } from '@/services/Discount'
 import { addOrder } from '@/services/Order'
+import { requestNewebPay } from '@/services'
+import { useAccountStore } from '@/stores'
 import type { CartItem, Discount, Coupon } from '@/model'
 import type { PaymentMethod } from '@/model/Payment'
 import type { ShipmentMethod } from '@/model/Shipment'
@@ -117,8 +119,11 @@ const recipientInfo = ref({
   name: '',
   phone: '',
   address: '',
+  email: '',
   remarks: ''
 })
+
+const accountStore = useAccountStore()
 
 // Computed properties
 const shippingFee = computed(() => {
@@ -173,7 +178,7 @@ const handleRecipientInfoUpdated = (info: typeof recipientInfo.value) => {
 const handleConfirmOrder = async () => {
   try {
     submitting.value = true
-    
+
     // Call addOrder API to create order
     const order = await addOrder({
       paymentMethod: selectedPaymentMethod.value,
@@ -184,12 +189,44 @@ const handleConfirmOrder = async () => {
       shippingAddress: recipientInfo.value.address,
       remarks: recipientInfo.value.remarks || undefined
     })
-    
+
     ElMessage.success('訂單建立成功！')
-    
-    // Redirect to payment page with order ID
-    router.push(`/order/${order.id}/payment`)
-    
+
+    // 如果是 NewebPay 付款方式，導向藍新支付
+    if (selectedPaymentMethod.value === 'credit_card_one_time') {
+      const email = recipientInfo.value.email || accountStore.profile?.email || ''
+      const newebPayData = await requestNewebPay({
+        orderId: order.id,
+        email: email
+      })
+
+      // 建立動態表單並提交到藍新
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway'
+
+      const params = {
+        MerchantID: newebPayData.merchantID,
+        TradeInfo: newebPayData.tradeInfo,
+        TradeSha: newebPayData.tradeSha,
+        Version: '2.0'
+      }
+
+      for (const [key, value] of Object.entries(params)) {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = key
+        input.value = value
+        form.appendChild(input)
+      }
+
+      document.body.appendChild(form)
+      form.submit()
+    } else {
+      // 其他付款方式，導向訂單詳情頁
+      router.push(`/order/${order.id}/payment`)
+    }
+
   } catch (err:any) {
     console.error('Failed to confirm order:', err)
     ElMessage.error(err.message)
