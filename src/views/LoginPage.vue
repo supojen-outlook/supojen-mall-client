@@ -114,8 +114,7 @@ const handleSignIn = async () => {
 }
 
 const handleLineLogin = () => {
-  const redirectUri = encodeURIComponent(`${window.location.origin}/`)
-  window.location.href = `${API_CONFIG.BASE_URL}/api/account/signin/line?redirectUri=${redirectUri}`
+  window.location.href = `${API_CONFIG.BASE_URL}/api/signin/line`
 }
 
 const goToSignup = () => {
