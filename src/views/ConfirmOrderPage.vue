@@ -44,12 +44,6 @@
             @coupon-selected="handleCouponSelected"
           />
           
-          <!-- Payment Method Section -->
-          <PaymentMethodSection 
-            :selected-method="selectedPaymentMethod"
-            @method-selected="handlePaymentMethodSelected"
-          />
-          
           <!-- Shipping Method Section -->
           <ShippingMethodSection 
             :selected-method="selectedShippingMethod"
@@ -93,13 +87,11 @@ import { addOrder } from '@/services/Order'
 import { requestNewebPay } from '@/services'
 import { useAccountStore } from '@/stores'
 import type { CartItem, Discount, Coupon } from '@/model'
-import type { PaymentMethod } from '@/model/Payment'
 import type { ShipmentMethod } from '@/model/Shipment'
 
 // Import child components
 import { CartSummarySection } from '@/components/CartSummarySection'
 import { DiscountSection } from '@/components/DiscountSection'
-import { PaymentMethodSection } from '@/components/PaymentMethodSection'
 import { ShippingMethodSection } from '@/components/ShippingMethodSection'
 import { RecipientForm } from '@/components/RecipientForm'
 import { OrderSummary } from '@/components/OrderSummary'
@@ -111,7 +103,6 @@ const cartItems = ref<CartItem[]>([])
 const discounts = ref<Discount[]>([])
 const coupons = ref<Coupon[]>([])
 const selectedCoupon = ref<Coupon | null>(null)
-const selectedPaymentMethod = ref<PaymentMethod>('credit_card_one_time')
 const selectedShippingMethod = ref<ShipmentMethod>('post')
 const submitting = ref(false)
 
@@ -163,10 +154,6 @@ const handleCouponSelected = (coupon: Coupon | null) => {
   selectedCoupon.value = coupon
 }
 
-const handlePaymentMethodSelected = (method: PaymentMethod) => {
-  selectedPaymentMethod.value = method
-}
-
 const handleShippingMethodSelected = (method: ShipmentMethod) => {
   selectedShippingMethod.value = method
 }
@@ -181,7 +168,7 @@ const handleConfirmOrder = async () => {
 
     // Call addOrder API to create order
     const order = await addOrder({
-      paymentMethod: selectedPaymentMethod.value,
+      paymentMethod: 'credit_card_one_time',
       shippingMethod: selectedShippingMethod.value,
       couponCode: selectedCoupon.value?.couponCode || undefined,
       recipientName: recipientInfo.value.name,
@@ -192,40 +179,35 @@ const handleConfirmOrder = async () => {
 
     ElMessage.success('訂單建立成功！')
 
-    // 如果是 NewebPay 付款方式，導向藍新支付
-    if (selectedPaymentMethod.value === 'credit_card_one_time') {
-      const email = recipientInfo.value.email || accountStore.profile?.email || ''
-      const newebPayData = await requestNewebPay({
-        orderId: order.id,
-        email: email
-      })
+    // 導向藍新支付
+    const email = recipientInfo.value.email || accountStore.profile?.email || ''
+    const newebPayData = await requestNewebPay({
+      orderId: order.id,
+      email: email
+    })
 
-      // 建立動態表單並提交到藍新
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway'
+    // 建立動態表單並提交到藍新
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = 'https://ccore.newebpay.com/MPG/mpg_gateway'
 
-      const params = {
-        MerchantID: newebPayData.merchantID,
-        TradeInfo: newebPayData.tradeInfo,
-        TradeSha: newebPayData.tradeSha,
-        Version: '2.0'
-      }
-
-      for (const [key, value] of Object.entries(params)) {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = value
-        form.appendChild(input)
-      }
-
-      document.body.appendChild(form)
-      form.submit()
-    } else {
-      // 其他付款方式，導向訂單詳情頁
-      router.push(`/order/${order.id}/payment`)
+    const params = {
+      MerchantID: newebPayData.merchantID,
+      TradeInfo: newebPayData.tradeInfo,
+      TradeSha: newebPayData.tradeSha,
+      Version: '2.0'
     }
+
+    for (const [key, value] of Object.entries(params)) {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = key
+      input.value = value
+      form.appendChild(input)
+    }
+
+    document.body.appendChild(form)
+    form.submit()
 
   } catch (err:any) {
     console.error('Failed to confirm order:', err)
