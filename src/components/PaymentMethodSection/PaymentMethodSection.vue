@@ -18,6 +18,7 @@
               <CreditCard v-if="method.includes('credit_card')" />
               <Wallet v-else-if="method.includes('mobile')" />
               <Money v-else-if="method.includes('atm')" />
+              <Shop v-else-if="method === 'cvs'" />
               <Coin v-else-if="method.includes('cash')" />
               <CreditCard v-else />
             </el-icon>
@@ -74,7 +75,8 @@ import {
   Wallet, 
   Money, 
   Coin, 
-  Lock 
+  Lock,
+  Shop
 } from '@element-plus/icons-vue'
 import type { PaymentMethod } from '@/model/Payment'
 
@@ -91,11 +93,12 @@ const emit = defineEmits<Emits>()
 
 const selectedMethod = ref<PaymentMethod>(props.selectedMethod)
 
-// Available payment methods (excluding cash)
+// Available payment methods
 const availablePaymentMethods = computed(() => {
   const allMethods: PaymentMethod[] = [
     'credit_card_one_time',
     'atm_virtual',
+    'cvs',
     'taiwan_pay'
   ]
   return allMethods
@@ -110,9 +113,11 @@ watch(() => props.selectedMethod, (newMethod) => {
 const getPaymentMethodName = (method: PaymentMethod): string => {
   const names: Record<PaymentMethod, string> = {
     'credit_card_one_time': '信用卡一次付清',
-    'atm_virtual': '虛擬帳號',
+    'atm_virtual': '匯款帳號',
+    'cvs': '超商代碼',
     'taiwan_pay': '台灣Pay',
-    'cash': '現金'
+    'cash': '現金',
+    'other': '其他'
   }
   return names[method] || method
 }
@@ -122,8 +127,10 @@ const getPaymentMethodDescription = (method: PaymentMethod): string => {
   const descriptions: Record<PaymentMethod, string> = {
     'credit_card_one_time': '支援 Visa、Mastercard、JCB 等信用卡',
     'atm_virtual': '透過 ATM 轉帳付款',
+    'cvs': '至便利商店出示代碼繳費',
     'taiwan_pay': '支援台灣 Pay 行動支付',
-    'cash': '貨到付款'
+    'cash': '貨到付款',
+    'other': '其他付款方式'
   }
   return descriptions[method] || ''
 }
@@ -138,8 +145,10 @@ const getPaymentMethodInfo = (method: PaymentMethod): string => {
   const infos: Record<PaymentMethod, string> = {
     'credit_card_one_time': '一次付清享額外 1% 現金回饋，交易安全有保障',
     'atm_virtual': '付款期限 3 天，逾期訂單將自動取消',
+    'cvs': '付款期限 3 天，至全家、7-11、萊爾富等便利商店繳費',
     'taiwan_pay': '整合多種行動支付，安全又方便',
-    'cash': '配送員送貨時收款，請準備現金'
+    'cash': '配送員送貨時收款，請準備現金',
+    'other': '特殊付款方式，請依照指示完成付款'
   }
   return infos[method] || ''
 }

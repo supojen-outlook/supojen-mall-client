@@ -8,7 +8,7 @@
  * @property taiwan_pay - 台灣Pay
  * @property cash - 現金
  */
-export type PaymentMethod = 'credit_card_one_time' | 'atm_virtual' | 'taiwan_pay' | 'cash';
+export type PaymentMethod = 'credit_card_one_time' | 'atm_virtual' | 'taiwan_pay' | 'cash' | 'cvs' | 'other';
 
 /**
  * 付款狀態

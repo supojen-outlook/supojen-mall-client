@@ -94,6 +94,38 @@
             <span class="label">付款金額：</span>
             <span class="value">NT$ {{ payment.amount.toLocaleString() }}</span>
           </div>
+          <div class="info-item" v-if="payment?.method">
+            <span class="label">付款方式：</span>
+            <span class="value">{{ getPaymentMethodName(payment.method) }}</span>
+          </div>
+          <!-- ATM 虛擬帳號資訊 -->
+          <div v-if="payment?.method === 'atm_virtual' && payment?.bankCode" class="payment-details">
+            <el-divider />
+            <div class="info-item">
+              <span class="label">收款銀行：</span>
+              <span class="value">{{ payment.bankCode }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.codeNo">
+              <span class="label">虛擬帳號：</span>
+              <span class="value highlight">{{ payment.codeNo }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expireAt">
+              <span class="label">付款期限：</span>
+              <span class="value">{{ formatTime(payment.expireAt) }}</span>
+            </div>
+          </div>
+          <!-- 超商代碼資訊 -->
+          <div v-if="payment?.method === 'cvs' && payment?.codeNo" class="payment-details">
+            <el-divider />
+            <div class="info-item">
+              <span class="label">繳費代碼：</span>
+              <span class="value highlight">{{ payment.codeNo }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expireAt">
+              <span class="label">付款期限：</span>
+              <span class="value">{{ formatTime(payment.expireAt) }}</span>
+            </div>
+          </div>
         </el-card>
 
         <el-card class="info-card">
@@ -220,7 +252,8 @@ import {
   ElTimeline,
   ElTimelineItem,
   ElLink,
-  ElMessage
+  ElMessage,
+  ElDivider
 } from 'element-plus'
 import {
   CircleCheck,
@@ -234,7 +267,7 @@ import {
   Service
 } from '@element-plus/icons-vue'
 import { getOrderPayment } from '@/services/Payment'
-import type { Payment } from '@/model'
+import type { Payment, PaymentMethod } from '@/model'
 
 const router = useRouter()
 const route = useRoute()
@@ -299,6 +332,18 @@ const formatTime = (time: string | null) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const getPaymentMethodName = (method: PaymentMethod): string => {
+  const names: Record<PaymentMethod, string> = {
+    'credit_card_one_time': '信用卡一次付清',
+    'atm_virtual': '匯款帳號',
+    'cvs': '超商代碼',
+    'taiwan_pay': '台灣Pay',
+    'cash': '現金',
+    'other': '其他'
+  }
+  return names[method] || method
 }
 
 const goToOrders = () => {
@@ -448,6 +493,17 @@ onMounted(() => {
   color: var(--el-text-color-secondary);
   text-align: center;
   font-size: 14px;
+}
+
+.payment-details {
+  margin-top: 12px;
+}
+
+.payment-details .highlight {
+  color: var(--el-color-primary);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 1px;
 }
 
 .reason-list {
