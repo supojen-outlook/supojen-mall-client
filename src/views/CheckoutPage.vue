@@ -109,9 +109,13 @@
               <span class="label">虛擬帳號：</span>
               <span class="value highlight">{{ payment.codeNo }}</span>
             </div>
-            <div class="info-item" v-if="payment?.expireAt">
+            <div class="info-item" v-if="payment?.expiredAt">
               <span class="label">付款期限：</span>
-              <span class="value">{{ formatTime(payment.expireAt) }}</span>
+              <span class="value">{{ formatTime(payment.expiredAt) }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label"></span>
+              <span class="value note">請於此日期前完成付款（不包含當天）</span>
             </div>
           </div>
           <!-- 超商代碼資訊 -->
@@ -121,9 +125,13 @@
               <span class="label">繳費代碼：</span>
               <span class="value highlight">{{ payment.codeNo }}</span>
             </div>
-            <div class="info-item" v-if="payment?.expireAt">
+            <div class="info-item" v-if="payment?.expiredAt">
               <span class="label">付款期限：</span>
-              <span class="value">{{ formatTime(payment.expireAt) }}</span>
+              <span class="value">{{ formatTime(payment.expiredAt) }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label"></span>
+              <span class="value note">請於此日期前完成付款（不包含當天）</span>
             </div>
           </div>
         </el-card>
@@ -183,6 +191,60 @@
       </el-result>
 
       <div class="order-info-section">
+        <!-- Payment Details for Pending State - MOVED TO FRONT -->
+        <el-card class="info-card" v-if="payment?.method">
+          <template #header>
+            <div class="card-header">
+              <el-icon><InfoFilled /></el-icon>
+              <span>付款資訊</span>
+            </div>
+          </template>
+          <div class="info-item">
+            <span class="label">付款方式：</span>
+            <span class="value">{{ getPaymentMethodName(payment.method) }}</span>
+          </div>
+          <div class="info-item" v-if="payment?.amount">
+            <span class="label">付款金額：</span>
+            <span class="value">NT$ {{ payment.amount.toLocaleString() }}</span>
+          </div>
+          <!-- ATM 匯款帳號資訊 -->
+          <div v-if="payment?.method === 'atm_virtual' && payment?.bankCode" class="payment-details">
+            <el-divider />
+            <div class="info-item">
+              <span class="label">收款銀行：</span>
+              <span class="value">{{ payment.bankCode }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.codeNo">
+              <span class="label">匯款帳號：</span>
+              <span class="value highlight">{{ payment.codeNo }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label">付款期限：</span>
+              <span class="value highlight">{{ formatTime(payment.expiredAt) }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label"></span>
+              <span class="value note">請於此日期前完成付款（不包含當天）</span>
+            </div>
+          </div>
+          <!-- 超商代碼資訊 -->
+          <div v-if="payment?.method === 'cvs' && payment?.codeNo" class="payment-details">
+            <el-divider />
+            <div class="info-item">
+              <span class="label">繳費代碼：</span>
+              <span class="value highlight">{{ payment.codeNo }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label">付款期限：</span>
+              <span class="value highlight">{{ formatTime(payment.expiredAt) }}</span>
+            </div>
+            <div class="info-item" v-if="payment?.expiredAt">
+              <span class="label"></span>
+              <span class="value note">請於此日期前完成付款（不包含當天）</span>
+            </div>
+          </div>
+        </el-card>
+
         <el-card class="info-card">
           <template #header>
             <div class="card-header">
@@ -325,12 +387,10 @@ const checkOrderStatus = async () => {
 
 const formatTime = (time: string | null) => {
   if (!time) return ''
-  return new Date(time).toLocaleString('zh-TW', {
+  return new Date(time).toLocaleDateString('zh-TW', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
+    day: '2-digit'
   })
 }
 
@@ -504,6 +564,12 @@ onMounted(() => {
   font-weight: 600;
   font-size: 18px;
   letter-spacing: 1px;
+}
+
+.payment-details .note {
+  color: var(--el-color-warning);
+  font-size: 12px;
+  font-style: italic;
 }
 
 .reason-list {

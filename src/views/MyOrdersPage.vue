@@ -137,9 +137,19 @@
                 <span class="label">付款金額：</span>
                 <span class="value price">NT$ {{ paymentsMap[order.id]!.amount.toLocaleString() }}</span>
               </div>
+              <div class="payment-actions" v-if="paymentsMap[order.id]!.status === 'pending'">
+                <el-button type="primary" size="small" @click="goToCheckout(order.id)">
+                  查看付款資訊
+                </el-button>
+              </div>
             </div>
             <div v-else class="payment-empty">
               <el-text type="info">無付款記錄</el-text>
+              <div class="payment-actions">
+                <el-button type="primary" size="small" @click="openPaymentRetryDialog(order.id)">
+                  重新付款
+                </el-button>
+              </div>
             </div>
           </div>
 
@@ -257,6 +267,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Payment Retry Dialog -->
+  <PaymentRetryDialog
+    v-model:visible="showPaymentRetryDialog"
+    :order-id="selectedOrderId"
+    :default-email="userEmail"
+    @confirm="handlePaymentRetry"
+    @cancel="handlePaymentRetryCancel"
+  />
 </template>
 
 <script setup lang="ts">
@@ -268,15 +287,25 @@ import { getMyOrders, getOrderItems } from '@/services/Order'
 import { getOrderShipment } from '@/services/Shipment'
 import { getOrderPayment } from '@/services/Payment'
 import { usePagination } from '@/composables/usePagination'
+import { PaymentRetryDialog } from '@/components'
+import { useAccountStore } from '@/stores'
 import type { Order, OrderItem } from '@/model'
 import type { OrderStatus, OrderItemStatus } from '@/model'
 import type { Shipment } from '@/model'
 import type { Payment, PaymentStatus } from '@/model/Payment'
 
 const router = useRouter()
+const accountStore = useAccountStore()
 
 // 日期篩選
 const dateRange = ref<[string, string] | null>(null)
+
+// Payment retry dialog state
+const showPaymentRetryDialog = ref(false)
+const selectedOrderId = ref<number>(0)
+
+// Get user email from account store
+const userEmail = computed(() => accountStore.profile?.email || '')
 
 // 檢查日期範圍是否有效（要么都有，要么都空）
 const isDateRangeValid = computed(() => {
@@ -490,6 +519,27 @@ const toggleOrder = async (orderId: number) => {
 // Navigation
 const goShopping = () => {
   router.push('/')
+}
+
+const goToCheckout = (orderId: number) => {
+  router.push(`/checkout?orderId=${orderId}`)
+}
+
+// Payment retry dialog functions
+const openPaymentRetryDialog = (orderId: number) => {
+  selectedOrderId.value = orderId
+  showPaymentRetryDialog.value = true
+}
+
+const handlePaymentRetry = (params: { orderId: number; email: string }) => {
+  // Payment is handled by the dialog component
+  // Just log for debugging
+  console.log('Payment retry initiated:', params)
+}
+
+const handlePaymentRetryCancel = () => {
+  selectedOrderId.value = 0
+  showPaymentRetryDialog.value = false
 }
 
 // Initialize
@@ -836,6 +886,11 @@ const clearDateFilter = () => {
   text-align: center;
   background: var(--el-fill-color-light);
   border-radius: 6px;
+}
+
+.payment-actions {
+  margin-top: 12px;
+  text-align: right;
 }
 
 .pagination-container {
