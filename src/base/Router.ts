@@ -64,19 +64,9 @@ const router = createRouter({
             component: () => import('../views/ProfilePage.vue')
         },
         {
-            path: '/checkout/notfound',
-            name: 'checkout-notfound',
-            component: () => import('../views/checkout/CheckoutNotFoundPage.vue')
-        },
-        {
-            path: '/checkout/success',
-            name: 'checkout-success',
-            component: () => import('../views/checkout/CheckoutSuccessPage.vue')
-        },
-        {
-            path: '/checkout/processing',
-            name: 'checkout-processing',
-            component: () => import('../views/checkout/CheckoutProcessingPage.vue')
+            path: '/checkout',
+            name: 'checkout',
+            component: () => import('../views/CheckoutPage.vue')
         },
     ]
 })

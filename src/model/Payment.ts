@@ -34,6 +34,9 @@ export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
  * @property paidAt - 付款時間
  * @property refundedAt - 退款時間
  * @property snapshot - 金流平台回傳的完整交易資訊（JSONB）
+ * @property bankCode - 銀行代碼
+ * @property codeNo - 銀行帳號或超商代碼
+ * @property expireAt - 付款期限
  */
 export interface Payment {
   id: number;
@@ -46,4 +49,7 @@ export interface Payment {
   paidAt: string | null;
   refundedAt: string | null;
   snapshot: Record<string, unknown> | null;
+  bankCode: string | null;
+  codeNo: string | null;
+  expireAt: string | null;
 }
