@@ -20,6 +20,7 @@ export type ShipmentMethod = 'post' | 'seven' | 'family';
  * @property recipientName - 收件人姓名
  * @property recipientPhone - 收件人電話
  * @property shipDate - 出貨日期
+ * @property deliveredDate - 送達日期
  * @property createdAt - 記錄建立時間
  */
 export interface Shipment {
@@ -31,5 +32,6 @@ export interface Shipment {
   recipientName: string;
   recipientPhone: string;
   shipDate: string | null;
+  deliveredDate: string | null;
   createdAt: string;
 }

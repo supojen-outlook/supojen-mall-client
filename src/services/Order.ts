@@ -58,3 +58,17 @@ export async function getMyOrders(params:{
 export async function getOrderItems(orderId: number): Promise<Pagination<OrderItem>> {
   return await request<Pagination<OrderItem>>('/api/orders/items', 'GET', { orderId })
 }
+
+/**
+ * 更新訂單配送資訊
+ * @param data 訂單配送資訊
+ * @param data.orderId 訂單 ID
+ * @param data.deliveredDate 送達日期
+ * @returns Promise<null> - 更新結果
+ */
+export async function updateOrderShipment(data: {
+  orderId: number;
+  deliveredDate?: string;
+}): Promise<null> {
+  return await request<null>('/api/orders/my-shipment', 'PUT', data)
+}

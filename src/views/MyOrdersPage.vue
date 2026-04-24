@@ -246,6 +246,50 @@
             <div v-else class="shipment-empty">
               <el-text type="info">物流信息暫未更新</el-text>
             </div>
+            
+            <!-- Shipping Tracking Reminder -->
+            <div v-if="shipmentsMap[order.id] && shipmentsMap[order.id]!.trackingNumber" class="tracking-reminder">
+              <el-alert
+                title="物流查詢提醒"
+                type="info"
+                :closable="false"
+                show-icon
+                class="tracking-alert"
+              >
+                <template #default>
+                  <div class="tracking-content">
+                    <div class="tracking-info">
+                      <span>您的物流追蹤編號：</span>
+                      <span class="tracking-number">{{ shipmentsMap[order.id]!.trackingNumber }}</span>
+                    </div>
+                    <div class="tracking-action">
+                      <span>您可以前往以下網站查詢物流進度：</span>
+                      <el-link 
+                        :href="getTrackingUrl(shipmentsMap[order.id]!.method)" 
+                        target="_blank" 
+                        type="primary"
+                        class="tracking-link"
+                      >
+                        {{ getTrackingSiteName(shipmentsMap[order.id]!.method) }}
+                      </el-link>
+                    </div>
+                  </div>
+                </template>
+              </el-alert>
+            </div>
+            
+            <!-- Delivery Confirmation Button -->
+            <div v-if="order.status === 'shipped'" class="delivery-confirmation">
+              <el-button
+                type="success"
+                size="small"
+                :loading="confirmingDelivery[order.id]"
+                @click="confirmDelivery(order.id)"
+                class="confirm-delivery-btn"
+              >
+                確認收貨
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -281,9 +325,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElSkeleton, ElResult, ElButton, ElEmpty, ElTag, ElIcon, ElDivider, ElText, ElImage, ElDatePicker } from 'element-plus'
+import { ElSkeleton, ElResult, ElButton, ElEmpty, ElTag, ElIcon, ElDivider, ElText, ElImage, ElDatePicker, ElMessageBox, ElMessage } from 'element-plus'
 import { ArrowDown, ArrowUp } from '@element-plus/icons-vue'
-import { getMyOrders, getOrderItems } from '@/services/Order'
+import { getMyOrders, getOrderItems, updateOrderShipment } from '@/services/Order'
 import { getOrderShipment } from '@/services/Shipment'
 import { getOrderPayment } from '@/services/Payment'
 import { usePagination } from '@/composables/usePagination'
@@ -303,6 +347,9 @@ const dateRange = ref<[string, string] | null>(null)
 // Payment retry dialog state
 const showPaymentRetryDialog = ref(false)
 const selectedOrderId = ref<number>(0)
+
+// Delivery confirmation state
+const confirmingDelivery = ref<Record<number, boolean>>({})
 
 // Get user email from account store
 const userEmail = computed(() => accountStore.profile?.email || '')
@@ -392,6 +439,26 @@ const formatShipmentMethod = (method: string | null): string => {
   return map[method || ''] || method || '未知'
 }
 
+// Get tracking URL based on shipping method
+const getTrackingUrl = (method: string | null): string => {
+  const urls: Record<string, string> = {
+    'post': 'https://postserv.post.gov.tw/pstmail/main_mail.html',
+    'seven': 'https://eservice.7-11.com.tw/E-Tracking/search.aspx',
+    'family': 'https://fmec.famiport.com.tw/FP_Entrance/QueryBox'
+  }
+  return urls[method || ''] || '#'
+}
+
+// Get tracking site name based on shipping method
+const getTrackingSiteName = (method: string | null): string => {
+  const names: Record<string, string> = {
+    'post': '中華郵政',
+    'seven': '7-11 便利商店',
+    'family': '全家便利商店'
+  }
+  return names[method || ''] || '物流查詢網站'
+}
+
 const paymentStatusText = (status: PaymentStatus): string => {
   const map: Record<PaymentStatus, string> = {
     'pending': '等待付款',
@@ -435,11 +502,20 @@ const getOrderProgressSteps = (order: Order) => {
     })
   }
 
+  const payment = paymentsMap.value[order.id]
+  const shipment = shipmentsMap.value[order.id]
+  const isPaid = payment?.status === 'paid'
+  const paidTime = isPaid ? payment.paidAt : order.paidAt
+  
+  // Check if order is completed based on shipment delivered date or order completed date
+  const isCompleted = !!order.completedAt || !!shipment?.deliveredDate
+  const completedTime = shipment?.deliveredDate || order.completedAt
+  
   const steps = [
     { key: 'created', label: '收到訂單', completed: true, time: formatSimpleDate(order.createdAt) },
-    { key: 'paid', label: '已付款', completed: !!order.paidAt, time: formatSimpleDate(order.paidAt) },
+    { key: 'paid', label: '已付款', completed: isPaid, time: formatSimpleDate(paidTime) },
     { key: 'shipped', label: '已出貨', completed: !!order.shippedAt, time: formatSimpleDate(order.shippedAt) },
-    { key: 'completed', label: '已完成', completed: !!order.completedAt, time: formatSimpleDate(order.completedAt) }
+    { key: 'completed', label: '已完成', completed: isCompleted, time: formatSimpleDate(completedTime) }
   ]
 
   return steps
@@ -540,6 +616,42 @@ const handlePaymentRetry = (params: { orderId: number; email: string }) => {
 const handlePaymentRetryCancel = () => {
   selectedOrderId.value = 0
   showPaymentRetryDialog.value = false
+}
+
+// Delivery confirmation functions
+const confirmDelivery = async (orderId: number) => {
+  try {
+    await ElMessageBox.confirm(
+      '您確定已收到此訂單的商品嗎？',
+      '確認收貨',
+      {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    confirmingDelivery.value[orderId] = true
+    
+    await updateOrderShipment({
+      orderId,
+      deliveredDate: new Date().toISOString()
+    })
+    
+    // Update local order status
+    const orderIndex = orders.value.findIndex(order => order.id === orderId)
+    if (orderIndex !== -1) {
+      orders.value[orderIndex].status = 'completed'
+      orders.value[orderIndex].completedAt = new Date().toISOString()
+    }
+    
+    ElMessage.success('訂單已標記為已完成')
+    
+  } catch (error: any) {
+    ElMessage.warning(error.message || '取消確認收貨')
+  } finally {
+    confirmingDelivery.value[orderId] = false
+  }
 }
 
 // Initialize
@@ -849,6 +961,85 @@ const clearDateFilter = () => {
   text-align: center;
   background: var(--el-fill-color-light);
   border-radius: 6px;
+}
+
+.tracking-reminder {
+  margin-top: 16px;
+}
+
+.tracking-alert {
+  border: 1px solid var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+}
+
+.tracking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tracking-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tracking-number {
+  font-weight: 600;
+  color: var(--el-color-primary);
+  font-size: 16px;
+  letter-spacing: 1px;
+  background: var(--el-color-primary-light-9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--el-color-primary-light-5);
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.tracking-action {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tracking-link {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.delivery-confirmation {
+  margin-top: 16px;
+  text-align: right;
+}
+
+.confirm-delivery-btn {
+  min-width: 100px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .tracking-content {
+    font-size: 14px;
+  }
+  
+  .tracking-number {
+    font-size: 14px;
+    padding: 3px 6px;
+  }
+  
+  .tracking-link {
+    font-size: 13px;
+  }
+  
+  .delivery-confirmation {
+    text-align: center;
+  }
+  
+  .confirm-delivery-btn {
+    width: 100%;
+    max-width: 200px;
+  }
 }
 
 .payment-info {
